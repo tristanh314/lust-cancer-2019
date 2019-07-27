@@ -1,0 +1,23 @@
+function [density express] = density_calc(data, factor )
+%   subroutine for density_fix
+mn=size(data);
+m=mn(1);
+n=mn(2);
+
+express=zeros(m,n);
+count=0;
+for i=1:m
+    for j=1:n
+        if data(i,j)>1/factor
+            express(i,j)=1;
+            count=count+1;
+        end
+        if data(i,j)<-1/factor
+            express(i,j)=-1;
+            count=count+1;
+        end
+    end
+end
+
+density=count/(m*n);
+end
