@@ -1,0 +1,344 @@
+function oldknob = lust_meta_to_sigs_july19( rids_file, exp_file, clinical_file, metax, dens, conftol )
+% This takes a metagene, identified by the rids_file, extracts its 
+% expression file, and uses the LUST algorithm to find signatures.
+% Signatures are ranked by their Fisher score.
+% Kaplan-Meier curves are plotted for the top ones.
+% Input:
+% rids_file is rids for the metagene
+% exp_file is expression for the cancer
+% clinical file is survival, censoring, etc.
+% metax is the label for the metagene, e.g., 'stomach meta R2' 
+% dens is density
+% algorithm is run at several conftol values, starting with conftolmin
+% Output
+% Top 10 signatures
+% Their Fisher scores and Kaplan-Meir survival curves
+% Differential expression on immune system genes for groups identified by
+% the signature
+% There are also some internal parameters which are set below
+
+     rids=importdata(rids_file);
+     data_0=importdata(exp_file);
+          RR=importdata('TCGA_trimrids.mat');
+          indx=symb2indx(rids,RR);
+          indx=indx.indxnosrt;
+     dataJ = data_0(indx,:);     
+     clinical=importdata(clinical_file);
+     surdata = clinical(:,[1,4]);
+     coxdata = clinical;
+  
+% Next we set the internal parameters
+% For merging the groups
+noruns=1;  %%no. of passes of merging overlapping groups
+overlapsupp=2;  %%min size of overlap
+overlappercent= .66  %.5;  %%min percentage of overlap
+% Min size group to keep when tossing small ones 
+gpminsize= 2 %3 %4; %5;  %8;
+%% no. G sub X to recalculate and graph
+topno = 10;  
+
+%size(dataJ)
+mn=size(dataJ);
+m=mn(1);
+n=mn(2);   
+[ d express ] = density_fix( dataJ, dens );
+d;
+
+%% more initialization
+groups=zeros(m);   %%will grow to gpsize by nn
+gpsize=zeros(m,1);   %%overkill on size
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+kount=0;
+size(express);
+
+%%preliminaries
+mn=size(express);
+m=mn(1);
+dominatrix=zeros(m,m);
+
+
+%%Now look at gene i -> gene j +/-
+for i=1:m
+ for j=1:m
+  if ~(i==j)
+     
+        sp=0;   %support positive
+        dp=0;   %deficit positive
+        sn=0;   %support negative
+        dn=0;   %deficit negative
+        for k=1:n
+            if express(i,k)==1
+                if express(j,k)==1
+                    sp=sp+1;
+                else
+                    dp=dp+1;
+                end
+            end
+            if express(i,k)==-1
+                if express(j,k)==-1
+                    sn=sn+1;
+                else
+                    dn=dn+1;
+                end
+            end
+        end
+    
+cp=0;  %to cover sp+dp=0
+cn=0;  %to cover sn+dn=0
+if sp+dp > 0 && sn+dn > 0        
+    cp = sp/(sp+dp);    %confidence positive
+    cn = sn/(sn+dn);    %confidence negative
+if cp >= conftol && cn >= conftol     
+    dominatrix(i,j)=1;    
+end
+end
+  end  %% end if i ne j
+  end  %%end j
+end  %end i
+
+
+%%do equivalences
+equivs=zeros(m,12);
+noequivs=zeros(m,1);
+maxequivs=1;
+for i=1:m
+    equivs(i,1)=i;
+    kt=1;
+    for j=1:m
+        if ~(i == j)
+            if dominatrix(i,j)==1 && dominatrix(j,i)==1
+                kt=kt+1;
+                equivs(i,kt)=j;
+            end
+        end
+    end
+    noequivs(i)=kt;
+    if kt>maxequivs 
+        maxequivs=kt;
+    end
+end
+
+%%do nonplayer
+nonplayers=[];    
+kt=0;
+for i=1:m
+    s=sum(dominatrix(i,:));
+    t=sum(dominatrix(:,i));
+    if s+t==0
+        kt=kt+1;
+        nonplayers(kt)=i;
+    end
+end
+
+%start making groups from equivalence classes
+mmnn=size(equivs);
+nn=mmnn(2);
+%%%groups=zeros(1,conftimes,1,nn);   %%will grow to gpsize by nn
+nogps = 0;
+minsize= 2;
+for k=1:m
+    if equivs(k,minsize) ~= 0
+        nogps = nogps+1;
+        for j=1:nn
+           groups (nogps,j)=equivs(k,j);
+        end
+    end
+end
+
+%sort groups by size
+%%%gpsize=zeros(1,conftimes,nogps(pp,qq),1);
+for k=1:nogps
+    gpsize(k)=noequivs(groups(k,1));
+end
+gpsize;
+
+temp=zeros(max(nogps,maxequivs+1));
+for xx=1:nogps
+    temp(xx,1)=gpsize(xx,1);
+    for yy=1:maxequivs
+        temp(xx,yy+1)=groups(xx,yy);
+    end
+end
+%temp=[gpsize groups];
+temp=sortrows(temp,-1);
+
+for xx=1:nogps
+    gpsize(xx,1)=temp(xx,1);
+    for yy=1:maxequivs
+        groups(xx,yy)=temp(xx,yy+1);
+    end
+end
+%groups=temp(:,2:maxequivs+1);
+%group member matrix
+gpmember=zeros(nogps,m);
+for i=1:nogps
+    for j=1:gpsize(i,1)
+        gpmember(i,groups(i,j))=1;
+    end
+end
+
+for runs=1:noruns  %%twice through cleans up a lot  
+%merging
+%parameters noruns, overlapsupp, overlappercent set at top
+k=1;
+while k < nogps
+    i=k+1;
+   while (k+1 <= i) && (i <= nogps)
+       ddot=gpmember(i,:)*gpmember(k,:)';
+       percent = ddot/gpsize(i,1);
+       if (ddot >= overlapsupp) && (percent >= overlappercent)
+           gpmember(k,:)=min(gpmember(k,:)+gpmember(i,:),1);
+           gpsize(k,1)=gpsize(k,1)+gpsize(i,1)-ddot;
+           %merge
+           ct=0;
+           for t=1:m
+           if gpmember(k,t)==1
+               ct=ct+1;
+               groups(k,ct)=t;
+           end
+           end
+           %%delete group "i"
+           if i < nogps
+               for j=i+1:nogps
+%%old version had k for this loop
+                   for kk=1:m    %%fixed size for this version
+                       groups(j-1,kk)=groups(j,kk);
+                       gpmember(j-1,kk)=gpmember(j,kk);
+                   end
+                       gpsize(j-1,1)=gpsize(j,1);
+               end
+           end
+           nogps=nogps-1;    
+       end
+   i=i+1;
+   end
+k=k+1;
+end
+end  %%end second run
+%%Toss small groups
+%%parameter gpminsize (min size to keep) set at top
+gpkt=1;
+for j=1:nogps
+    if gpsize(j,1) >= gpminsize
+        gpkt=j;
+    end
+end
+%%groups=groups(:,:,1:gpkt,:);
+% gpsize=gpsize(:,:,1:gpkt,:);
+nogps=gpkt;
+%%previous version may keep some 3-elt gps; alternate below messes regulates...
+%gpkt=1;
+%keep(1)=1;
+%for j=2:nogps(pp,qq)
+%    if gpsize(j) >= gpminsize
+%        gpkt=gpkt+1;
+%        keep(gpkt)=j;
+%    end
+%end
+%groups=groups(keep,:);
+%gpsize=gpsize(keep,:);
+%nogps(pp,qq)=gpkt;
+        
+groups;
+gpsize;
+nogps;
+
+
+%%get rids for groups
+mn=size(groups);
+gprids=cell(nogps,mn(1));
+for i=1:nogps
+    for j=1:gpsize(i,1)
+        gprids(i,j)=rids(groups(i,j));
+    end
+end
+
+gprids;
+groups;
+gpsize;
+nogps;
+for ii=1:nogps
+%%%%%%%%%%  now check G_X  %%%%%%%%%%%%%%%%%%%%%%%%%%
+
+    indx=groups(ii,:);
+    indx=find(indx > 0);
+    data4=dataJ(indx,:);
+
+    [u,s,v]=svd(data4);
+    u1=u(:,1);
+    s(1,1);  %%in case you want the singular values
+    s(2,2);
+    escore=u1'*data4;
+    escore=escore';  %%just transpose
+%%normalize minimum escore to be -2 (includes censored tho')
+%mine=min(escore);
+%m=-2/mine
+%escore=m*escore;
+
+p1=1;
+p2=1;
+     [z0, p1, p2] = eigsurvplot_topbot_noage(escore,surdata,coxdata,0);
+     xlabel(metax)
+
+fisher=-log(p1)-log(p2)
+indxhi=z0.indxhi;
+indxlo=z0.indxlo;
+
+topregs_results(ii,1)=dens;
+topregs_results(ii,2)=conftol;
+topregs_results(ii,3)=ii;
+topregs_results(ii,4)=gpsize(ii);
+%topregs_results(ii,5)=nosbgp;
+topregs_results(ii,6)=p1;
+topregs_results(ii,7)=p2;
+topregs_results(ii,8)=fisher;
+
+end %%end ii loop
+
+oldknob = sortrows(topregs_results,-8);  %sorted list of top sigs
+oldknob
+
+
+%oldknob=oldknob(1:50,:);   %%30
+%%shamelessly recalculate top ones
+topno = min(nogps,8);  %%internal parameter, no. to recalculate and graph, set at top
+
+for jj=1:topno
+    ii=oldknob(jj,3);
+
+%%info to screen, counting
+display ('start new')
+jj
+gpsize(ii);
+
+groups(ii,1:gpsize(ii));
+gprids(ii,1:gpsize(ii))
+
+indx=groups(ii,:);
+    indx=find(indx > 0);
+    data4=dataJ(indx,:);
+
+    [u,s,v]=svd(data4);
+    u1=u(:,1);
+    s(1,1);  %%in case you want the singular values
+    s(2,2);
+    escore=u1'*data4;
+    escore=escore';  %%just transpose
+
+p1=1;
+p2=1;
+     [z0, p1, p2] = eigsurvplot_topbot_noage(escore,surdata,coxdata,1);
+     xlabel(metax)
+
+fisher=-log(p1)-log(p2)
+indxhi=z0.indxhi;
+indxlo=z0.indxlo;  
+
+end %%end jj loop
+end %endfn
+
+
