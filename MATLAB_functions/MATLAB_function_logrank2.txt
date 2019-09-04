@@ -1,0 +1,132 @@
+function p=logrank2(x,y,show,xname,yname)
+% Log-rank test(Approximate)
+% The logrank test is a hypothesis test to compare the survival distributions of two samples. 
+% It is a nonparametric test and appropriate to use when the data are right 
+% censored (technically, the censoring must be non-informative).
+%
+% Syntax: p=logrank2(x,y,show,xname,yname)
+%         
+% Input: 
+%x and y - two groups;
+% show -0:don't show the result
+%      -1(default):show the result
+%      -2:show the graph and the result
+%  xname,yname :name for x and y ,(default):X;Y
+% Output: p:p value
+%  
+%      
+%
+% Example: 
+%  m1=[2 3 9 10 10 -12 15 -15 16 -18 -24 30 -36 -40 -45]
+%  m2=[9 -12 16 19 -19 -20 -20 -24 -24 -30 -31 -34 -42 -44 -53 -59 -62] 
+% OR:
+%  m1=[2 3 9 10 10 12 15 15 16 18 24 30 36 40 45;...
+%      0 0 0 0 0 1 0 1 0 1 1 0 1 1 1]
+%  m2=[9 -12 16 19 -19 -20 -20 -24 -24 -30 -31 -34 -42 -44 -53 -59 -62;...
+%      0 1 0 0 1 1 1 1 1 1 1 1 1 1 1 1 1] 
+%   Elements are 1 for observations that are right-censored and 0 for
+%    observations that are observed exactly. 
+%
+%    logrank(m1,m2,2,'OperA','OperB')
+%    or logrank(m1,m2)
+%    or logrank(m1,m2,0)
+%           Created by foxet    -----Fan Lin
+%           foxetfoxet@gamil.com
+
+if nargin<3;show=1;end
+if length(x(:,1))>1 && length(x(1,:))>1
+    if length(x(1,:))>2 x=x';y=y';end
+alx1=x(:,1);alx2=x(:,2);x=alx1.*(1-alx2.*2);
+aly1=y(:,1);aly2=y(:,2);y=aly1.*(1-aly2.*2);
+else
+if length(x(:,1))==1 x=x';y=y';end
+end
+x=sortrows(x);y=sortrows(y);lx=length(x);ly=length(y);
+[bx,ix1,mx1]=unique(x,'first');
+[bx,ix2,mx2]=unique(x,'last');
+ux=ix2-ix1+1;cx=ux;dx=ux;
+dx(find(bx<0))=0;cx(find(bx>0))=0;
+[by,iy1,my1]=unique(y,'first');
+[by,iy2,my2]=unique(y,'last');
+uy=iy2-iy1+1;cy=uy;dy=uy;
+dy(find(by<0))=0;cy(find(by>0))=0;
+datax=[dx cx ux];datay=[dy cy uy];
+%dataxy:A table for failure event ,censored value  and so on.
+%dataxy 
+%dataxy(:,1:2):original data 
+%dataxy(:,3):Failure events for x  (dx)
+%dataxy(:,4):Censored values for x 
+%dataxy(:,5):Events(Failure+Censor) for x
+%dataxy(:,6):inital number for x (nx)
+%dataxy(:,7):Failure events for y  (dx)
+%dataxy(:,8):Censored values for y
+%dataxy(:,9):Events(Failure+Censor) for y
+%dataxy(:,10):inital number (ny)
+%dataxy(:,11):Expect T (TX=(dx+dy)*ny/(nx+ny))
+%dataxy(:,11):Expect T (TY=(dx+dy)*nyx/(nx+ny))
+dataxy=unique([bx;by]);
+dataxy=sortrows([abs(dataxy) dataxy]);
+datam=dataxy;
+dataxy(1,6)=lx;dataxy(1,10)=ly;
+for i=1:length(dataxy)
+    k=find(bx==dataxy(i,2));k2=find(by==dataxy(i,2));
+    if isempty(k) 
+        dataxy(i,3:5)=[0,0,0];
+else 
+        dataxy(i,3:5)=datax(k,:);
+end
+if isempty(k2)
+dataxy(i,7:9)=[0,0,0];
+else 
+dataxy(i,7:9)=datay(k2,:);
+end
+if(i>1)
+dataxy(i,6)=lx-sum(dataxy(1:i-1,5)); 
+dataxy(i,10)=ly-sum(dataxy(1:i-1,9));
+
+end
+end
+n1j=dataxy(:,6);n2j=dataxy(:,10);d1j=dataxy(:,3);d2j=dataxy(:,7);
+nj=n1j+n2j;dj=d1j+d2j;
+dataxy(:,11)=dj.*n1j./nj;
+dataxy(:,12)=dj.*n2j./nj;
+% just for test dataxy(:,13)=n1j.*n2j.*dj.*(nj-dj)./(nj.^2.*(nj-1))
+sumall=nansum(dataxy);
+U1=sumall(3)-sumall(11);U2=sumall(7)-sumall(12);
+chi1=U1^2/sumall(11)+U2^2/sumall(12);
+p=1-cdf('chi2',chi1,1);
+%sumall(13)
+% chi2=(sumall(3)-sumall(11))^2/sumall(13)+(sumall(7)-sumall(12))^2/sumall(13)
+% p2=1-cdf('chi2',chi2,1)
+
+%display result
+if show>0
+     if nargin<4 xname='X';end
+    if nargin<5 yname='Y';end
+disp(' ')
+    disp('Summary of the Number of Censored and Uncensored Values')
+    disp(' ')
+    disp('  GROUP          Total     Failed    Censored    "%Censored" ' );
+    fprintf('----------------------------------------------------------------\n');
+    fprintf('%10s %10.0f %10.0f %10.0f %10.2f\n',xname(1:min(10,length(xname))),lx,sumall(3),sumall(4),sumall(4)*100/lx); 
+    fprintf('%10s %10.0f %10.0f %10.0f %10.2f\n',yname(1:min(10,length(yname))),[ly sumall(7) sumall(8) sumall(8)*100/ly]); 
+    fprintf('%10s %10.0f %10.0f %10.0f %10.2f\n','Total',[lx+ly sumall(3)+sumall(7) sumall(4)+sumall(8) (sumall(4)+sumall(8))*100/(lx+ly)]); 
+    fprintf('----------------------------------------------------------------\n');
+    fprintf('Chi-square:%3.4f     P:%6.4f \n',[chi1,p].');
+end
+if show>1
+  if sumall(4)<lx
+    [f,xx,flo,fup] = ecdf(abs(x),'censoring',(1-x./abs(x))/2,'function','survivor');
+    stairs(xx,f,'r');
+    hold on;
+  end
+  if sumall(8)<ly
+     [f2,yy,flo2,fup2] = ecdf(abs(y),'censoring',(1-y./abs(y))/2,'function','survivor');
+     stairs(yy,f2);
+  end
+title('Survival Functions');
+xlabel('Time');
+ylabel('Survival Ratio');
+legend(xname,yname) 
+hold off;
+end
