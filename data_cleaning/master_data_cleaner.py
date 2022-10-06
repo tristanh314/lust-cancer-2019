@@ -121,11 +121,10 @@ def cleaner(clin_data, gene_data, stage_column, death_columns, follow_up_columns
     hybrid_ref_pre = np.array(list(map(lambda x: x.lower(), hybrid_ref_pre)))
     print(hybrid_ref_pre == clin_clean['patient.bcr_patient_barcode'].to_numpy())
     # Create new columns in the dataframe containing the stage of the tumor
-    # as an integer (not applicable to all tumor types, this line can be
-    # commented out when necessary), whether the patient was alive or dead at
+    # as an integer whether the patient was alive or dead at
     # last contact, the days to last contact, and the patient's age at last
     # contact.
-    # clin_clean['Integer Stage'] = list(map(lambda x: stage_changer(x), clin_clean[stage_column]))
+    # clin_clean['Integer Stage'] = list(map(lambda x: stage_changer(x), clin_clean[stage_column])) #Comment out if stage not present
     clin_clean['Alive or Dead'] = clin_clean.apply(lambda x: death_finder(x, death_columns, follow_up_columns)[0], axis=1)
     clin_clean['Last Contact'] = clin_clean.apply(lambda x: death_finder(x, death_columns, follow_up_columns)[1], axis=1)
     clin_clean['Age at Last Contact'] = clin_clean.apply(lambda x: death_finder(x, death_columns, follow_up_columns)[2], axis=1)
@@ -142,7 +141,7 @@ def cleaner(clin_data, gene_data, stage_column, death_columns, follow_up_columns
 # commented out when not running the script.
 cleaner('../2022_raw_data/clinical/GBMLGG.clin.merged.txt',
        '../2022_raw_data/rna_exp/GBMLGG.rnaseqv2__illuminahiseq_rnaseqv2__unc_edu__Level_3__RSEM_genes_normalized__data.data.txt',
-       'patient.stage_event.clinical_stage', # Wrong data file? Or formatting changed? Needs commenting out for this tumor?
+       'patient.stage_event.clinical_stage',
        ['patient.days_to_death',
         'patient.follow_ups.follow_up.days_to_death',
         'patient.follow_ups.follow_up-2.days_to_death',
