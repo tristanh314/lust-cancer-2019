@@ -140,15 +140,15 @@ def cleaner(clin_data, gene_data, stage_column, death_columns, follow_up_columns
 
 # Run the cleaner on each tumor type here for ease of data entry. To be
 # commented out when not running the script.
-#cleaner('./UVM/UVM.clin.merged.txt',
-#        './UVM/UVM.rnaseqv2__illuminahiseq_rnaseqv2__unc_edu__Level_3__RSEM_genes_normalized__data.data.txt',
-#        'patient.stage_event.clinical_stage',
-#        ['patient.days_to_death',
-#         'patient.follow_ups.follow_up.days_to_death',
-#         'patient.follow_ups.follow_up-2.days_to_death',
-#         'patient.follow_ups.follow_up-3.days_to_death'],
-#        ['patient.days_to_last_followup',
-#         'patient.follow_ups.follow_up.days_to_last_followup',
-#         'patient.follow_ups.follow_up-2.days_to_last_followup',
-#         'patient.follow_ups.follow_up-3.days_to_last_followup'],
-#        './UVM/uvm_clin_clean.csv', './UVM/uvm_gene_clean.csv')
+cleaner('../2022_raw_data/clinical/GBMLGG.clin.merged.txt',
+       '../2022_raw_data/rna_exp/GBMLGG_rnaseqv2__unc_edu__Level_3__RSEM_genes_normalized__data.data.txt',
+       'patient.stage_event.clinical_stage',
+       ['patient.days_to_death',
+        'patient.follow_ups.follow_up.days_to_death',
+        'patient.follow_ups.follow_up-2.days_to_death',
+        'patient.follow_ups.follow_up-3.days_to_death'],
+       ['patient.days_to_last_followup',
+        'patient.follow_ups.follow_up.days_to_last_followup',
+        'patient.follow_ups.follow_up-2.days_to_last_followup',
+        'patient.follow_ups.follow_up-3.days_to_last_followup'],
+       '../2022_processed_data/GBMLGG_clin_clean.csv', '../2022_processed_data/GBMLGG_gene_clean.csv')

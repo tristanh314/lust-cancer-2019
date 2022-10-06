@@ -105,3 +105,4 @@ venv.bak/
 
 # uncompressed data files
 2022_raw_data/
+2022_processed_data/
