@@ -125,7 +125,7 @@ def cleaner(clin_data, gene_data, stage_column, death_columns, follow_up_columns
     # commented out when necessary), whether the patient was alive or dead at
     # last contact, the days to last contact, and the patient's age at last
     # contact.
-    clin_clean['Integer Stage'] = list(map(lambda x: stage_changer(x), clin_clean[stage_column]))
+    # clin_clean['Integer Stage'] = list(map(lambda x: stage_changer(x), clin_clean[stage_column]))
     clin_clean['Alive or Dead'] = clin_clean.apply(lambda x: death_finder(x, death_columns, follow_up_columns)[0], axis=1)
     clin_clean['Last Contact'] = clin_clean.apply(lambda x: death_finder(x, death_columns, follow_up_columns)[1], axis=1)
     clin_clean['Age at Last Contact'] = clin_clean.apply(lambda x: death_finder(x, death_columns, follow_up_columns)[2], axis=1)
