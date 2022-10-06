@@ -141,8 +141,8 @@ def cleaner(clin_data, gene_data, stage_column, death_columns, follow_up_columns
 # Run the cleaner on each tumor type here for ease of data entry. To be
 # commented out when not running the script.
 cleaner('../2022_raw_data/clinical/GBMLGG.clin.merged.txt',
-       '../2022_raw_data/rna_exp/GBMLGG_rnaseqv2__unc_edu__Level_3__RSEM_genes_normalized__data.data.txt',
-       'patient.stage_event.clinical_stage',
+       '../2022_raw_data/rna_exp/GBMLGG.rnaseqv2__illuminahiseq_rnaseqv2__unc_edu__Level_3__RSEM_genes_normalized__data.data.txt',
+       'patient.stage_event.clinical_stage', # Wrong data file? Or formatting changed? Needs commenting out for this tumor?
        ['patient.days_to_death',
         'patient.follow_ups.follow_up.days_to_death',
         'patient.follow_ups.follow_up-2.days_to_death',
