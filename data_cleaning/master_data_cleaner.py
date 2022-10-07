@@ -137,8 +137,7 @@ def cleaner(clin_data, gene_data, stage_column, death_columns, follow_up_columns
     gene_clean.to_csv(clean_gene_file, header=False)
     return
 
-# Run the cleaner on each tumor type here for ease of data entry. To be
-# commented out when not running the script.
+# Run the cleaner on each tumor type here for ease of data entry.
 cleaner('../2022_raw_data/clinical/GBMLGG.clin.merged.txt',
        '../2022_raw_data/rna_exp/GBMLGG.rnaseqv2__illuminahiseq_rnaseqv2__unc_edu__Level_3__RSEM_genes_normalized__data.data.txt',
        'patient.stage_event.clinical_stage',
@@ -151,3 +150,12 @@ cleaner('../2022_raw_data/clinical/GBMLGG.clin.merged.txt',
         'patient.follow_ups.follow_up-2.days_to_last_followup',
         'patient.follow_ups.follow_up-3.days_to_last_followup'],
        '../2022_processed_data/GBMLGG_clin_clean.csv', '../2022_processed_data/GBMLGG_gene_clean.csv')
+
+# Join processed data on patient ID for collaborations.
+import numpy as np
+import pandas as pd
+join_data_genetic = pd.read_csv("2022_processed_data/GBMLGG_gene_clean.csv",index_col=0)
+samples = list(join_data_genetic.columns)
+join_data_clinical = pd.read_csv("2022_processed_data/GBMLGG_clin_clean.csv",header=0,names=samples,index_col=0)
+join_data_complete = pd.concat([join_data_clinical,join_data_genetic],axis=1,join="outer")
+join_data_complete.to_csv("2022_processed_data/GBMLGG_complete_clean.csv")
