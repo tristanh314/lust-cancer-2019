@@ -154,8 +154,11 @@ cleaner('../2022_raw_data/clinical/GBMLGG.clin.merged.txt',
 # Join processed data on patient ID for collaborations.
 import numpy as np
 import pandas as pd
-join_data_genetic = pd.read_csv("2022_processed_data/GBMLGG_gene_clean.csv",index_col=0)
-samples = list(join_data_genetic.columns)
-join_data_clinical = pd.read_csv("2022_processed_data/GBMLGG_clin_clean.csv",header=0,names=samples,index_col=0)
-join_data_complete = pd.concat([join_data_clinical,join_data_genetic],axis=1,join="outer")
-join_data_complete.to_csv("2022_processed_data/GBMLGG_complete_clean.csv")
+join_data_genetic = pd.read_csv("2022_processed_data/GBMLGG_gene_clean.csv",header=None, index_col=0)
+row_needed_genetic = list(join_data_genetic.loc["Hybridization REF"])
+# print(join_data_genetic.head())
+print(row_needed_genetic)
+join_data_clinical = pd.read_csv("2022_processed_data/GBMLGG_clin_clean.csv",header=None,index_col=0)
+row_needed_clinical = list(join_data_clinical.loc["patient.bcr_patient_barcode"])
+print(row_needed_clinical)
+# print(join_data_clinical.head())
