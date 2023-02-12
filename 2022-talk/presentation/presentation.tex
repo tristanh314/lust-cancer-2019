@@ -137,3 +137,125 @@
 \date[\today]{PSU Systems Science Seminar\\ \today} % Presentation date or conference/meeting name, the optional parameter can contain a shortened version to appear on the bottom of every slide, while the required parameter value is output to the title slide
 
 %----------------------------------------------------------------------------------------
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE SLIDE
+%----------------------------------------------------------------------------------------
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+%	TABLE OF CONTENTS SLIDE
+%----------------------------------------------------------------------------------------
+
+% The table of contents outputs the sections and subsections that appear in your presentation, specified with the standard \section and \subsection commands. You may either display all sections and subsections on one slide with \tableofcontents, or display each section at a time on subsequent slides with \tableofcontents[pausesections]. The latter is useful if you want to step through each section and mention what you will discuss.
+
+\begin{frame}
+	\frametitle{Presentation Overview}
+	
+	\tableofcontents
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+
+\section{Introduction} 
+
+%------------------------------------------------
+\begin{frame}
+	\frametitle{Abstract}
+	
+	In 2019 the UH Cancer Center hosted a project to identify genetic factors of interest in various types of cancer.
+	
+	\bigskip 
+
+	One of the results of this effort was the use of the Lattice Upstream Targeting (LUST) Algorithm to analyze mRNA expression data for 33 different types of cancer in the TCGA database. This effort will be the topic of this presentation.
+	
+    \bigskip
+
+    The full results of this effort can be found \href{https://github.com/tristanh314/lust-cancer-2019}{on GitHub}.
+
+	\bigskip 
+
+    Results of a similar project conducted using data proprietary to the UH cancer center led to studies seeking to identfy new chemical treatments.
+\end{frame}
+
+%------------------------------------------------
+\begin{frame}
+	\frametitle{Overview of Procedure}
+	
+	\begin{itemize}
+        \item The LUST algorithm is a discrete mathematical method for analyzing continuous data, i.e., mRNA expression.
+        \item For a given array of expression data, the algorithm is applied twice.
+        \item 
+        \begin{enumerate}
+            \item The first run is on the entire expression matrix and uses a graph theoretic objective function to rank the groups obtained. This pass identifies and ranks a small set of \emph{metagenes} associated with the given cancer.
+            \item The second run is on the expression matrix for each metagene and supervised by survival time as the objective function using the Fisher score to rank the results. This pass identifies small predictive \emph{signiatures} for each metagene.
+        \end{enumerate}
+        \item In some cases, certain signiatures would seem approprite to use as guides for treatment.
+    \end{itemize}
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+
+\section{Data Setup}
+
+%------------------------------------------------
+\begin{frame}
+	\frametitle{Data Aquisition and Cleaning}
+	
+	\begin{itemize}
+        \item TCGA mRNA expression and clinical data are downloaded from the Broad Institute via the \href{https://gdac.broadinstitute.org/}{Firehose GDAC portal}.
+        \item Normalized gene expression files sequenced by Illumina HiSeq are used, reporting expression levels for 20,531 genes.
+        \item Samples from tissue surrounding tumors are removed so that each patient has a single record representing tumor tissue.
+        \item The expression data is log transformed, quantile normalized, and row centered.
+        \item Survival times and censoring information for each patient are contained in the clinical data and used later in the process.
+    \end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\begin{frame}
+	\frametitle{Data Discretization}
+	
+	\begin{itemize}
+        \item The expression data is represented by a $20531 \times N$ real valued matrix $\mathbf{E}$, where $N$ is the number of samples.
+        \item The matrix $\mathbf{E}$ is discretized into a $20531 \times N$ matrix $\mathbf{M}$ with entries in $\left\{ -1, 0, 1\right\}$.
+        \item The desired density $D$ of non-zero entries in $\mathbf{M}$ is obtained by adjusting a threshold variable $\phi$ using the matrix secant method.
+        \item For this study $D = 0.5$ for all cancers. In any particular study, one may seek to vary $D$ to optimize the results.
+    \end{itemize}
+\end{frame}
+
+%----------------------------------------------------------------------------------------
+
+\section{The Lattice Upstream Targeting Algorithm}
+
+%------------------------------------------------
+\begin{frame}
+	\frametitle{Specifications}
+	
+	\begin{block}{}
+        The LUST algorithm is used to find metagenes (\emph{Part I}), or signiatures (\emph{Part II}).
+    \end{block}
+
+    \begin{block}{Input}
+        \begin{itemize}
+            \item Discretized expression matrix $\mathbf{M}$.
+            \item Parameters \emph{density} and \emph{conftol}.
+            \item For Part II only, clinical data such as survival.
+        \end{itemize}
+    \end{block}
+
+    \begin{block}{Output}
+        \begin{itemize}
+            \item Objective function ranked Metagenes (Part I) or signiatures (Part II).
+            \item For Part II only, a score placing patients into high and low risk groups.
+            \item For Part II only, Kaplan-Meyer survival curves.
+        \end{itemize}
+    \end{block}
+\end{frame}
+
+
+\end{document}
