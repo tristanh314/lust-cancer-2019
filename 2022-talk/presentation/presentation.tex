@@ -243,19 +243,112 @@
     \begin{block}{Input}
         \begin{itemize}
             \item Discretized expression matrix $\mathbf{M}$.
-            \item Parameters \emph{density} and \emph{conftol}.
+            \item Parameters \emph{density}, \emph{conftol}, \emph{overlap} and \emph{noregs}.
             \item For Part II only, clinical data such as survival.
         \end{itemize}
     \end{block}
 
     \begin{block}{Output}
         \begin{itemize}
-            \item Objective function ranked Metagenes (Part I) or signiatures (Part II).
+            \item Metagenes (Part I) or signiatures (Part II) ranked by an objective function.
             \item For Part II only, a score placing patients into high and low risk groups.
             \item For Part II only, Kaplan-Meyer survival curves.
         \end{itemize}
     \end{block}
 \end{frame}
 
+\begin{frame}
+	\frametitle{Regulation and Equivalence}
+    
+    Assume the density $D$ has been fixed (0.5 in this study). We use \emph{conftol} (0.75 in this study) to adjust sensitivity.
+    
+    \bigskip
 
+    \begin{definition}
+        For a gene $X$, let $X^{+}$ denote the number of columns marked with 1 and $x^{-}$ the number of columns marked with -1. We say $X$ \emph{regulates} $Y$, denoted $X \rightarrow Y$, if
+        \begin{enumerate}
+            \item $\frac{\left| X^{+} \cap Y^{+} \right|}{\left| X^{+} \right|} \geq conftol,\ \mathrm{and}$
+            \item $\frac{\left| X^{-} \cap Y^{-} \right|}{\left| X^{-} \right|} \geq conftol.$
+        \end{enumerate}
+    \end{definition}
+
+    \begin{definition}
+        We say gene $X$ is \emph{eqvialent} to gene $Y$ and write $X \approx Y$ if $X \rightarrow Y$ and $Y \rightarrow X$.
+    \end{definition}
+
+    Not the best terminology but we can get by.
+\end{frame}
+
+\begin{frame}
+	\frametitle{Forming Groups}
+
+    The algorithm begins by computing, for each gene $X$
+    \begin{equation*}
+        F_X := \left\{ Y : Y \approx X \right\}
+    \end{equation*}
+
+    \bigskip
+
+    Note: $F_X$ is not necessarily and equilence class as $\approx$ is not transitive. Different groups merged if
+    \begin{equation*}
+        \frac{\left| F_X \cap F_Y \right|}{\min(\left| F_X \right|, \left| F_Y \right|)} \geq overlap
+    \end{equation*}
+
+    In this study, default values for \emph{overlap} were 0.5 for Part I and 0.6 for Part II. Merging was performed only once.
+\end{frame}
+
+
+\begin{frame}
+    \frametitle{Refinement Using Upstream Regulators}
+
+    Score every gene $X$ to measure it's effectiveness regulating the entire set of genes.
+    \begin{equation*}
+        s_X = \frac{1}{N} \cdot \sum_{X \rightarrow Y}\frac{\left( \left| X^{+} \cap Y^{+}\right| + \left| X^{-} \cap Y^{-}\right| \right)^2}{\left| X^{+} \right| + \left| X^{-} \right|}
+    \end{equation*}
+    Let $G$ be a group from the previous step. For each $X \notin G$, conisder
+    \begin{equation*}
+        G_X = \left\{ X \right\} \cup \left\{ Y \in G : X \rightarrow G \right\},
+    \end{equation*}
+    and assign a score
+    \begin{equation*}
+        p_{X,G}=\frac{\left| G_X \right|}{\left| G \right|}(1+s_X)
+    \end{equation*}
+    For $noregs=k$ (default 5), keep $G_{X_1}, \ldots, G_{X_k}$ with the $k$ highest scores $p_{X,G}$ for further analysis.
+\end{frame}
+
+\begin{frame}
+    \frametitle{Objective Functions}
+    \begin{block}{Part I}
+        For a given metagene $M$ with $n$ genes, we consider $M$ as a directed graph with edges determined by $X \rightarrow Y$, and let $E$ be the set of edges of this graph.
+        
+        \smallskip
+        
+        We use a measure of the probability of obtaining a set of vertices of size $n$ with $\left| E \right|$ edges.
+        \begin{equation*}
+            f(M) = \frac{\left| E \right|}{n-1}
+        \end{equation*}
+    \end{block}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Objective Functions}
+    \begin{block}{Part II}
+        For each $G_X$ form a submatrix $\mathbf{E}_{G_X}$ from the undiscretized expression data.
+        
+        \smallskip
+        
+        Use eigen-survival analysis to produce a predictive score for each patient that is a linear combinatin of their expression values for $G_X$
+
+        \smallskip
+
+        The top and bottom quartiles of the predictive scores are identified and used to calculate Kaplan-Meier expected surival curves.
+
+        \smallskip
+
+        Use the logrank and Cox tests to measure the separation of these two curves. Each test produces a $p$-value ($p_1$ and $p_2$, respectively). The \emph{Fisher score} combines these measures to rank how well the signiature separates the survival curves.
+        \begin{equation*}
+            F(G_X) = -\ln(p_1)-ln(p_2)
+        \end{equation*}
+    \end{block}
+\end{frame}
 \end{document}

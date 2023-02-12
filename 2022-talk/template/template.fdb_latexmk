@@ -1,5 +1,5 @@
 # Fdb version 3
-["pdflatex"] 1676159225 "c:/git_repos/lust-cancer-2019/2022-talk/template/template.tex" "c:/git_repos/lust-cancer-2019/2022-talk/template/template.pdf" "template" 1676159231
+["pdflatex"] 1676159225 "c:/git_repos/lust-cancer-2019/2022-talk/template/template.tex" "c:/git_repos/lust-cancer-2019/2022-talk/template/template.pdf" "template" 1676176033
   "c:/git_repos/lust-cancer-2019/2022-talk/template/template.aux" 1676159230 5553 2b295b524f438c53eff9b36ae0784844 ""
   "c:/git_repos/lust-cancer-2019/2022-talk/template/template.tex" 1675798856 17543 bdffd8b645257d58db40b9639b985c83 ""
   "c:/texlive/2020/texmf-dist/fonts/enc/dvips/base/8r.enc" 1617320908 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
@@ -239,12 +239,12 @@
   "template.vrb" 1676159230 272 b0e6abf05a1575b6c86e67e2caf3c3e2 "pdflatex"
   (generated)
   "template.aux"
-  "c:/git_repos/lust-cancer-2019/2022-talk/template/template.pdf"
-  "template.snm"
   "template.log"
   "template.toc"
-  "template.nav"
+  "template.pdf"
+  "template.snm"
+  "c:/git_repos/lust-cancer-2019/2022-talk/template/template.log"
   "template.out"
   "template.vrb"
-  "template.pdf"
-  "c:/git_repos/lust-cancer-2019/2022-talk/template/template.log"
+  "template.nav"
+  "c:/git_repos/lust-cancer-2019/2022-talk/template/template.pdf"
