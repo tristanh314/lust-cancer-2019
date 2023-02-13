@@ -260,7 +260,7 @@
 \begin{frame}
 	\frametitle{Regulation and Equivalence}
     
-    Assume the density $D$ has been fixed (0.5 in this study). We use \emph{conftol} (0.75 in this study) to adjust sensitivity.
+    Assume the density $D$ has been fixed (0.5 in this study). We use \emph{conftol} (in this study 0.75 for Part I and either 0.66, 0.7, or 0.74 for Part II) to adjust sensitivity.
     
     \bigskip
 
@@ -275,8 +275,6 @@
     \begin{definition}
         We say gene $X$ is \emph{eqvialent} to gene $Y$ and write $X \approx Y$ if $X \rightarrow Y$ and $Y \rightarrow X$.
     \end{definition}
-
-    Not the best terminology but we can get by.
 \end{frame}
 
 \begin{frame}
@@ -351,4 +349,149 @@
         \end{equation*}
     \end{block}
 \end{frame}
+
+\begin{frame}
+    \frametitle{Fase Discovery Rates - Notation}
+
+    Fix a density $D$, let $p=\frac{D}{2}$, and let $\gamma = conftol$. Consider an $m \times n$ matrix with entries from $\left\{ -1, 0, 1 \right\}$ assigned from uniform probability distributions with densities $p,\ p,\ 1-2p$.
+    
+    \smallskip
+
+    \begin{block}{Probability row $X$ has $a$ entries $1$ and $b$ entries $-1$}
+        \begin{equation*}
+            g(n,a,b,p) = \binom{n}{a+b}p^{a+b}(1-2p)^{n-a-b}
+        \end{equation*}        
+    \end{block}
+
+    \begin{block}{Probability row $Y$ has $c$ entries $1$ in $a$ columns}
+        \begin{equation*}
+            h(a,c,p) = \binom{n}{c}p^{c}(1-p)^{n-c}
+        \end{equation*}        
+    \end{block}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Fase Discovery Rates - Derivation}
+
+    Fix a density $D$, let $p=\frac{D}{2}$, and let $\gamma = conftol$. Consider an $m \times n$ matrix with entries from $\left\{ -1, 0, 1 \right\}$ assigned from uniform probability distributions with densities $p,\ p,\ 1-2p$.
+    
+    \smallskip
+
+    \begin{block}{Probability $X \rightarrow Y$}
+        \begin{equation*}
+            \sum_{1\leq a,b\leq n}g(n,a,b,p)\left( \sum_{a\geq c \geq \gamma a} h(a,c,p) \right)\left( \sum_{b\geq d \geq \gamma d} h(b,d,p) \right)
+        \end{equation*}        
+    \end{block}
+
+    \begin{block}{Expected number of relations $X \rightarrow Y$}
+        \begin{equation*}
+            E = m(m-1) \cdot \mathrm{prob}(X \rightarrow Y)
+        \end{equation*}        
+    \end{block}
+\end{frame}
+
+\begin{frame}
+    \frametitle{False Discovery Rates - In Practice}
+
+    Testing on permuted data matrices shows these estimates are quite accurate for values of $conftol$ used in this study.
+
+    \bigskip
+
+    The probability of random edges or used $conftol$ is very low, on the order of $10^{-5}$ at most.
+
+    \bigskip
+
+    The worst-case scenario in this study was cholangiocarcinoma, with only 36 patients. Here $E$ is about $9,220$, but the analysis found $830,000$ arrows.
+
+    \bigskip
+
+    For Part II, there are even fewer random arrows expected.
+\end{frame}
+
+\begin{frame}
+    \frametitle{False Discovery Rates - In Practice}
+
+    Testing on permuted data matrices shows these estimates are quite accurate for values of $conftol$ used in this study.
+
+    \bigskip
+
+    The probability of random edges or used $conftol$ is very low, on the order of $10^{-5}$ at most.
+
+    \bigskip
+
+    The worst-case scenario in this study was cholangiocarcinoma, with only 36 patients. Here $E$ is about $9,220$, but the analysis found $830,000$ arrows.
+
+    \bigskip
+
+    For Part II, there are even fewer random arrows expected.
+\end{frame}
+
+\begin{frame}
+    \frametitle{Sensitivity - Simulations}
+
+    To test the sensitiivty of LUST, simulations were run $5,000 \times 120$ signal matrix $\mathbf{S}$ with a step signal in the first 200 rows consisting of 30 enttries of $1$, 30 entries of $-1$, and 60 zeros.
+    
+    \bigskip
+
+    A Gaussian noise matrix was made to create $\mathbf{M} = \mathbf{S} + a\mathbf{N}$, using $a$ to adjust signal-to-noise ratio.
+
+    \bigskip
+
+    Repeated tests were run at various levels of $conftol$. 
+
+    \bigskip
+
+    The conclusion was that the signals detected by Part I are quite strong.
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Sensitivity - Results}
+	\framesubtitle{Subtitle} % Optional subtitle
+	
+	\begin{table}
+		\begin{tabular}{l l l}
+			\toprule
+			\textbf{SNR} & \textbf{Rows Found} & \textbf{False Positives}\\
+			\midrule
+			$-10db$ & 188 & 0 \\
+			$-12.5db$ & 4 & 0 \\
+			$-15db$ & 0 & 0 \\
+			\bottomrule
+		\end{tabular}
+		\caption{$conftol$ = 0.7}
+	\end{table}
+
+    \begin{table}
+		\begin{tabular}{l l l}
+			\toprule
+			\textbf{SNR} & \textbf{Rows Found} & \textbf{False Positives}\\
+			\midrule
+			$-10db$ & 200 & 0 \\
+			$-12.5db$ & 196 & 0 \\
+			$-15db$ & 50 & 0 \\
+			\bottomrule
+		\end{tabular}
+		\caption{$conftol$ = 0.6}
+	\end{table}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Sensitivity - More Results}
+	\framesubtitle{Subtitle} % Optional subtitle
+	
+	\begin{table}
+		\begin{tabular}{l l l}
+			\toprule
+			\textbf{SNR} & \textbf{Rows Found} & \textbf{False Positives}\\
+			\midrule
+			$-10db$ & 200 & 0 \\
+			$-12.5db$ & 200 & 0 \\
+			$-15db$ & 199 & 4 \\
+			\bottomrule
+		\end{tabular}
+		\caption{$conftol$ = 0.5}
+	\end{table}
+\end{frame}
+
 \end{document}
