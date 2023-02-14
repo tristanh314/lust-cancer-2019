@@ -169,15 +169,15 @@
 	\frametitle{Abstract}
 	
 	In 2019 the UH Cancer Center hosted a project to identify genetic factors of interest in various types of cancer.
-	
+	\pause
 	\bigskip 
 
 	One of the results of this effort was the use of the Lattice Upstream Targeting (LUST) Algorithm to analyze mRNA expression data for 33 different types of cancer in the TCGA database. This effort will be the topic of this presentation.
-	
+	\pause
     \bigskip
 
     The full results of this effort can be found \href{https://github.com/tristanh314/lust-cancer-2019}{on GitHub}.
-
+    \pause
 	\bigskip 
 
     Results of a similar project conducted using data proprietary to the UH cancer center led to studies seeking to identfy new chemical treatments.
@@ -188,13 +188,17 @@
 	\frametitle{Overview of Procedure}
 	
 	\begin{itemize}
-        \item The LUST algorithm is a discrete mathematical method for analyzing continuous data, i.e., mRNA expression.
+        \item The LUST algorithm is a discrete mathematical method for analyzing continuous data, e.g., mRNA expression.
+        \pause
         \item For a given array of expression data, the algorithm is applied twice.
+        \pause
         \item 
         \begin{enumerate}
             \item The first run is on the entire expression matrix and uses a graph theoretic objective function to rank the groups obtained. This pass identifies and ranks a small set of \emph{metagenes} associated with the given cancer.
+            \pause
             \item The second run is on the expression matrix for each metagene and supervised by survival time as the objective function using the Fisher score to rank the results. This pass identifies small predictive \emph{signiatures} for each metagene.
         \end{enumerate}
+        \pause
         \item In some cases, certain signiatures would seem approprite to use as guides for treatment.
     \end{itemize}
 \end{frame}
@@ -209,9 +213,13 @@
 	
 	\begin{itemize}
         \item TCGA mRNA expression and clinical data are downloaded from the Broad Institute via the \href{https://gdac.broadinstitute.org/}{Firehose GDAC portal}.
+        \pause
         \item Normalized gene expression files sequenced by Illumina HiSeq are used, reporting expression levels for 20,531 genes.
+        \pause
         \item Samples from tissue surrounding tumors are removed so that each patient has a single record representing tumor tissue.
+        \pause
         \item The expression data is log transformed, quantile normalized, and row centered.
+        \pause
         \item Survival times and censoring information for each patient are contained in the clinical data and used later in the process.
     \end{itemize}
 \end{frame}
@@ -222,8 +230,11 @@
 	
 	\begin{itemize}
         \item The expression data is represented by a $20531 \times N$ real valued matrix $\mathbf{E}$, where $N$ is the number of samples.
+        \pause
         \item The matrix $\mathbf{E}$ is discretized into a $20531 \times N$ matrix $\mathbf{M}$ with entries in $\left\{ -1, 0, 1\right\}$.
+        \pause
         \item The desired density $D$ of non-zero entries in $\mathbf{M}$ is obtained by adjusting a threshold variable $\phi$ using the matrix secant method.
+        \pause
         \item For this study $D = 0.5$ for all cancers. In any particular study, one may seek to vary $D$ to optimize the results.
     \end{itemize}
 \end{frame}
@@ -235,11 +246,10 @@
 %------------------------------------------------
 \begin{frame}
 	\frametitle{Specifications}
-	
 	\begin{block}{}
         The LUST algorithm is used to find metagenes (\emph{Part I}), or signiatures (\emph{Part II}).
     \end{block}
-
+    \pause
     \begin{block}{Input}
         \begin{itemize}
             \item Discretized expression matrix $\mathbf{M}$.
@@ -247,7 +257,7 @@
             \item For Part II only, clinical data such as survival.
         \end{itemize}
     \end{block}
-
+    \pause
     \begin{block}{Output}
         \begin{itemize}
             \item Metagenes (Part I) or signiatures (Part II) ranked by an objective function.
@@ -263,7 +273,7 @@
     Assume the density $D$ has been fixed (0.5 in this study). We use \emph{conftol} (in this study 0.75 for Part I and either 0.66, 0.7, or 0.74 for Part II) to adjust sensitivity.
     
     \bigskip
-
+    \pause
     \begin{definition}
         For a gene $X$, let $X^{+}$ denote the number of columns marked with 1 and $x^{-}$ the number of columns marked with -1. We say $X$ \emph{regulates} $Y$, denoted $X \rightarrow Y$, if
         \begin{enumerate}
@@ -271,7 +281,7 @@
             \item $\frac{\left| X^{-} \cap Y^{-} \right|}{\left| X^{-} \right|} \geq conftol.$
         \end{enumerate}
     \end{definition}
-
+    \pause
     \begin{definition}
         We say gene $X$ is \emph{eqvialent} to gene $Y$ and write $X \approx Y$ if $X \rightarrow Y$ and $Y \rightarrow X$.
     \end{definition}
@@ -284,43 +294,22 @@
     \begin{equation*}
         F_X := \left\{ Y : Y \approx X \right\}
     \end{equation*}
-
-    \bigskip
-
-    Note: $F_X$ is not necessarily and equilence class as $\approx$ is not transitive. Different groups merged if
+    \pause
+    Note: $F_X$ is not necessarily an equivalence class as $\approx$ is not transitive. Different groups are merged if
     \begin{equation*}
         \frac{\left| F_X \cap F_Y \right|}{\min(\left| F_X \right|, \left| F_Y \right|)} \geq overlap
     \end{equation*}
-
+    \pause
     In this study, default values for \emph{overlap} were 0.5 for Part I and 0.6 for Part II. Merging was performed only once.
-\end{frame}
-
-
-\begin{frame}
-    \frametitle{Refinement Using Upstream Regulators}
-
-    Score every gene $X$ to measure it's effectiveness regulating the entire set of genes.
-    \begin{equation*}
-        s_X = \frac{1}{N} \cdot \sum_{X \rightarrow Y}\frac{\left( \left| X^{+} \cap Y^{+}\right| + \left| X^{-} \cap Y^{-}\right| \right)^2}{\left| X^{+} \right| + \left| X^{-} \right|}
-    \end{equation*}
-    Let $G$ be a group from the previous step. For each $X \notin G$, conisder
-    \begin{equation*}
-        G_X = \left\{ X \right\} \cup \left\{ Y \in G : X \rightarrow G \right\},
-    \end{equation*}
-    and assign a score
-    \begin{equation*}
-        p_{X,G}=\frac{\left| G_X \right|}{\left| G \right|}(1+s_X)
-    \end{equation*}
-    For $noregs=k$ (default 5), keep $G_{X_1}, \ldots, G_{X_k}$ with the $k$ highest scores $p_{X,G}$ for further analysis.
 \end{frame}
 
 \begin{frame}
     \frametitle{Objective Functions}
     \begin{block}{Part I}
         For a given metagene $M$ with $n$ genes, we consider $M$ as a directed graph with edges determined by $X \rightarrow Y$, and let $E$ be the set of edges of this graph.
-        
         \smallskip
         
+        \pause
         We use a measure of the probability of obtaining a set of vertices of size $n$ with $\left| E \right|$ edges.
         \begin{equation*}
             f(M) = \frac{\left| E \right|}{n-1}
@@ -329,19 +318,40 @@
 \end{frame}
 
 \begin{frame}
+    \frametitle{Refinement Using Upstream Regulators}
+    Score every gene $X$ to measure it's effectiveness regulating the entire set of genes.
+    \begin{equation*}
+        s_X = \frac{1}{N} \cdot \sum_{X \rightarrow Y}\frac{\left( \left| X^{+} \cap Y^{+}\right| + \left| X^{-} \cap Y^{-}\right| \right)^2}{\left| X^{+} \right| + \left| X^{-} \right|}
+    \end{equation*}
+    \pause
+    Let $G$ be a group from the previous step. For each $X \notin G$, conisder
+    \begin{equation*}
+        G_X = \left\{ X \right\} \cup \left\{ Y \in G : X \rightarrow G \right\},
+    \end{equation*}
+    \pause
+    and assign a score
+    \begin{equation*}
+        p_{X,G}=\frac{\left| G_X \right|}{\left| G \right|}(1+s_X)
+    \end{equation*}
+    \pause
+    For $noregs=k$ (default 5), keep $G_{X_1}, \ldots, G_{X_k}$ with the $k$ highest scores $p_{X,G}$ for further analysis.
+\end{frame}
+
+
+\begin{frame}
     \frametitle{Objective Functions}
     \begin{block}{Part II}
         For each $G_X$ form a submatrix $\mathbf{E}_{G_X}$ from the undiscretized expression data.
-        
         \smallskip
-        
-        Use eigen-survival analysis to produce a predictive score for each patient that is a linear combinatin of their expression values for $G_X$.
+        \pause
 
+        Use eigen-survival analysis to produce a predictive score for each patient that is a linear combinatin of their expression values for $G_X$.
         \smallskip
+        \pause
 
         The top and bottom quartiles of the predictive scores are identified and used to calculate Kaplan-Meier expected surival curves.
-
         \smallskip
+        \pause
 
         Use the logrank and Cox tests to measure the separation of these two curves. Each test produces a $p$-value ($p_1$ and $p_2$, respectively). The \emph{Fisher score} combines these measures to rank how well the signiature separates the survival curves.
         \begin{equation*}
@@ -352,17 +362,14 @@
 
 \begin{frame}
     \frametitle{Fase Discovery Rates - Notation}
-
     Fix a density $D$, let $p=\frac{D}{2}$, and let $\gamma = conftol$. Consider an $m \times n$ matrix with entries from $\left\{ -1, 0, 1 \right\}$ assigned from uniform probability distributions with densities $p,\ p,\ 1-2p$.
-    
     \smallskip
-
+    \pause
     \begin{block}{Probability row $X$ has $a$ entries $1$ and $b$ entries $-1$}
         \begin{equation*}
             g(n,a,b,p) = \binom{n}{a+b}p^{a+b}(1-2p)^{n-a-b}
         \end{equation*}        
     \end{block}
-
     \begin{block}{Probability row $Y$ has $c$ entries $1$ in $a$ columns}
         \begin{equation*}
             h(a,c,p) = \binom{n}{c}p^{c}(1-p)^{n-c}
@@ -372,17 +379,15 @@
 
 \begin{frame}
     \frametitle{Fase Discovery Rates - Derivation}
-
     Fix a density $D$, let $p=\frac{D}{2}$, and let $\gamma = conftol$. Consider an $m \times n$ matrix with entries from $\left\{ -1, 0, 1 \right\}$ assigned from uniform probability distributions with densities $p,\ p,\ 1-2p$.
-    
+    \pause
     \smallskip
-
     \begin{block}{Probability $X \rightarrow Y$}
         \begin{equation*}
             \sum_{1\leq a,b\leq n}g(n,a,b,p)\left( \sum_{a\geq c \geq \gamma a} h(a,c,p) \right)\left( \sum_{b\geq d \geq \gamma d} h(b,d,p) \right)
         \end{equation*}        
     \end{block}
-
+    \pause
     \begin{block}{Expected number of relations $X \rightarrow Y$}
         \begin{equation*}
             E = m(m-1) \cdot \mathrm{prob}(X \rightarrow Y)
@@ -392,35 +397,16 @@
 
 \begin{frame}
     \frametitle{False Discovery Rates - In Practice}
-
     Testing on permuted data matrices shows these estimates are quite accurate for values of $conftol$ used in this study.
-
+    \pause
     \bigskip
 
     The probability of random edges or used $conftol$ is very low, on the order of $10^{-5}$ at most.
-
+    \pause
     \bigskip
 
     The worst-case scenario in this study was cholangiocarcinoma, with only 36 patients. Here $E$ is about $9,220$, but the analysis found $830,000$ arrows.
-
-    \bigskip
-
-    For Part II, there are even fewer random arrows expected.
-\end{frame}
-
-\begin{frame}
-    \frametitle{False Discovery Rates - In Practice}
-
-    Testing on permuted data matrices shows these estimates are quite accurate for values of $conftol$ used in this study.
-
-    \bigskip
-
-    The probability of random edges or used $conftol$ is very low, on the order of $10^{-5}$ at most.
-
-    \bigskip
-
-    The worst-case scenario in this study was cholangiocarcinoma, with only 36 patients. Here $E$ is about $9,220$, but the analysis found $830,000$ arrows.
-
+    \pause
     \bigskip
 
     For Part II, there are even fewer random arrows expected.
@@ -428,21 +414,16 @@
 
 \begin{frame}
     \frametitle{Sensitivity - Simulations}
-
     To test the sensitiivty of LUST, simulations were run $5,000 \times 120$ signal matrix $\mathbf{S}$ with a step signal in the first 200 rows consisting of 30 enttries of $1$, 30 entries of $-1$, and 60 zeros.
-    
+    \pause
     \bigskip
-
     A Gaussian noise matrix was made to create $\mathbf{M} = \mathbf{S} + a\mathbf{N}$, using $a$ to adjust signal-to-noise ratio.
-
+    \pause
     \bigskip
-
     Repeated tests were run at various levels of $conftol$. 
-
+    \pause
     \bigskip
-
     The conclusion was that the signals detected by Part I are quite strong.
-
 \end{frame}
 
 \begin{frame}
@@ -461,7 +442,7 @@
 		\end{tabular}
 		\caption{$conftol$ = 0.7}
 	\end{table}
-
+    \pause
     \begin{table}
 		\begin{tabular}{l l l}
 			\toprule
@@ -494,4 +475,42 @@
 	\end{table}
 \end{frame}
 
+%----------------------------------------------------------------------------------------
+
+\section{Conclusions and Future Research}
+
+\begin{frame}
+    \frametitle{Conclusions}
+    \begin{itemize}
+        \item Several metagenes appear to be of interest across multiple types of tumors with several variations. Other metagenes are prominnet for only a single kind of tumor.
+        \pause
+        \item Metagenes with signiatures that result in the separation of Kaplan-Meier survival curves indicate biological processes of interest.
+        \pause
+        \item Separating tumors by stage results in different metagenes of interest, seeming to indicate that different biological processes become more prominent as the disease progresses.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Future Investigations}
+    \begin{itemize}
+        \item Using signiatures to determine a patient's risk and aggresiveness of treatment (\href{https://github.com/tristanh314/lust-cancer-2019/blob/master/papers/melanoma_signature_2.pdf}{Nation, 2019}).
+        \pause
+        \item Include methyliation and microRNA expression in the analysis.
+        \pause
+        \item Modify the $X \rightarrow Y$ relationship to include negative correlation.
+        \pause
+        \item Use the algorithm to study continuous data related to other diseases, specifically where the diseased tissue can be isolated and sampled.
+    \end{itemize}
+    \begin{block}{The Last Word}
+        \emph{``LUST is good\ldots}
+        \pause
+        \smallskip
+
+        \emph{\ldots and so is the algorithm.''} - J.B. Nation
+    \end{block}
+    \pause
+    \begin{center}
+        \large{Thank you!}
+    \end{center}
+\end{frame}
 \end{document}
