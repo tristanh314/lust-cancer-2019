@@ -1442,6 +1442,11 @@ INPUT c:/texlive/2020/texmf-dist/fonts/vf/ascender/opensans/OpenSans-Bold-OT1-TL
 INPUT c:/texlive/2020/texmf-dist/fonts/tfm/ascender/opensans/OpenSans-Bold-OT1-TLF--base.tfm
 INPUT c:/texlive/2020/texmf-dist/fonts/vf/adobe/helvetic/phvro7t.vf
 INPUT c:/texlive/2020/texmf-dist/fonts/tfm/adobe/helvetic/phvro8r.tfm
+INPUT c:/git_repos/lust-cancer-2019/2022-talk/presentation/frankenstein_helping.jpg
+INPUT c:/git_repos/lust-cancer-2019/2022-talk/presentation/frankenstein_helping.jpg
+INPUT c:/git_repos/lust-cancer-2019/2022-talk/presentation/frankenstein_helping.jpg
+INPUT c:/git_repos/lust-cancer-2019/2022-talk/presentation/frankenstein_helping.jpg
+INPUT c:/git_repos/lust-cancer-2019/2022-talk/presentation/frankenstein_helping.jpg
 OUTPUT c:/git_repos/lust-cancer-2019/2022-talk/presentation/presentation.nav
 OUTPUT c:/git_repos/lust-cancer-2019/2022-talk/presentation/presentation.toc
 OUTPUT c:/git_repos/lust-cancer-2019/2022-talk/presentation/presentation.snm
