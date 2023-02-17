@@ -261,7 +261,7 @@
     \begin{block}{Output}
         \begin{itemize}
             \item Metagenes (Part I) or signiatures (Part II) ranked by an objective function.
-            \item For Part II only, Kaplan-Meyer survival curves.
+            \item For Part II only, \href{https://www.mygreatlearning.com/blog/kaplan-meier-curve-explained}{Kaplan-Meyer} survival curves and a model scoring each metagene based on survival.
         \end{itemize}
     \end{block}
 \end{frame}
@@ -299,21 +299,29 @@
         \frac{\left| F_X \cap F_Y \right|}{\min(\left| F_X \right|, \left| F_Y \right|)} \geq overlap
     \end{equation*}
     \pause
-    In this study, default values for \emph{overlap} were 0.5 for Part I and 0.6 for Part II. Merging was performed only once. For Part I, the resulting groups are called \emph{metagenes}.
+    In this study, default values for \emph{overlap} were 0.5 for Part I and 0.6 for Part II. Merging was performed only once. For Part I, the resulting groups are then examined by hand to identify representative \emph{metagenes}.
 \end{frame}
 
 \begin{frame}
     \frametitle{Objective Functions}
     \begin{block}{Part I}
-        For a given metagene $M$ with $n$ genes, we consider $M$ as a directed graph with edges determined by $X \rightarrow Y$, and let $E$ be the set of edges of this graph.
+        For a given group from the previous step $G$ with $n$ genes, we consider $M$ as a directed graph with edges determined by $X \rightarrow Y$, and let $E$ be the set of edges of this graph.
         \smallskip
         
         \pause
         We use a measure of the probability of obtaining a set of vertices of size $n$ with $\left| E \right|$ edges.
         \begin{equation*}
-            f(M) = n \cdot \frac{\left| E \right|}{n(n-1)}= \frac{\left| E \right|}{n-1}
+            f(G) = n \cdot \frac{\left| E \right|}{n(n-1)}= \frac{\left| E \right|}{n-1}
         \end{equation*}
     \end{block}
+
+    \pause
+    \bigskip
+    An example of output for Part I can be found in \cite[page 12]{p2}
+
+    \pause
+    \bigskip
+    Choose representative G's for each clustering of groups, these representatives are the \emph{metagenes} we analyze in Part II.
 \end{frame}
 
 \begin{frame}
@@ -323,7 +331,7 @@
         s_X = \frac{1}{N} \cdot \sum_{X \rightarrow Y}\frac{\left( \left| X^{+} \cap Y^{+}\right| + \left| X^{-} \cap Y^{-}\right| \right)^2}{\left| X^{+} \right| + \left| X^{-} \right|}
     \end{equation*}
     \pause
-    Let $G$ be a group from the previous step. For each $X \notin G$, conisder
+    Let $G$ be a representative group that was kept from the initial grouping step. For each $X \notin G$, conisder
     \begin{equation*}
         G_X = \left\{ X \right\} \cup \left\{ Y \in G : X \rightarrow G \right\},
     \end{equation*}
@@ -336,6 +344,26 @@
     For $noregs=k$ (default 5), keep $G_{X_1}, \ldots, G_{X_k}$ with the $k$ highest scores $p_{X,G}$ for further analysis.
 \end{frame}
 
+\begin{frame}
+    \frametitle{Eigen-Survival Analysis}
+
+    For a signiature obtained from the previous step, form an expression matrix $\mathbf{M}$. Consider the SVD:
+    \begin{equation*}
+        \mathbf{M} = \sum_{i=1}^{r}\sigma_i \mathbf{u}_i \mathbf{v}_i^T.
+    \end{equation*}
+    \pause
+    \begin{equation*}
+        B = \left\{ j\ |\ \mathbf{v}_j \mathrm{\ significant\ in\ KM\ and\ Cox\ with\ } p \leq 0.5 \right\}
+    \end{equation*}
+    \pause
+    \begin{equation*}
+        \mathbf{w} = \sum_{j \in B}\mathrm{sign}(j)\sigma_j \mathbf{v}_j
+    \end{equation*}
+    \pause
+    \begin{equation*}
+        \mathbf{w} = \sum_{j \in B}\mathrm{sign}(j)\mathbf{M}^{T} \mathbf{v}_j
+    \end{equation*}
+\end{frame}
 
 \begin{frame}
     \frametitle{Objective Functions}
@@ -348,14 +376,16 @@
         \smallskip
         \pause
 
-        The top and bottom quartiles of the predictive scores are identified and used to calculate Kaplan-Meier expected surival curves.
+        The top and bottom quartiles of the predictive scores are identified and used to calculate \href{https://www.mygreatlearning.com/blog/kaplan-meier-curve-explained}{Kaplan-Meier} expected surival curves.
         \smallskip
         \pause
 
-        Use the logrank and Cox tests to measure the separation of these two curves. Each test produces a $p$-value ($p_1$ and $p_2$, respectively). The \emph{Fisher score} combines these measures to rank how well the signiature separates the survival curves.
+        Use the \href{https://en.wikipedia.org/wiki/Logrank_test}{logrank} and \href{https://encyclopediaofmath.org/wiki/Cox_regression_model}{Cox} tests to measure the separation of these two curves. The \emph{Fisher score} combines the $p$-values to rank the signiature.
         \begin{equation*}
             F(G_X) = -\ln(p_1)-ln(p_2)
         \end{equation*}
+        \pause
+        For metagenes with high Fisher scores, the eigen-survival score is a model that may be useful for classifying risk, see \cite{p3}
     \end{block}
 \end{frame}
 
@@ -433,7 +463,6 @@
 
 \begin{frame}
 	\frametitle{Sensitivity - Results}
-	\framesubtitle{Subtitle} % Optional subtitle
 	
 	\begin{table}
 		\begin{tabular}{l l l}
@@ -464,7 +493,6 @@
 
 \begin{frame}
 	\frametitle{Sensitivity - More Results}
-	\framesubtitle{Subtitle} % Optional subtitle
 	
 	\begin{table}
 		\begin{tabular}{l l l}
@@ -489,7 +517,7 @@
     \begin{itemize}
         \item Several metagenes appear to be of interest across multiple types of tumors with several variations. Other metagenes are prominnet for only a single kind of tumor.
         \pause
-        \item Metagenes with signiatures that result in the separation of Kaplan-Meier survival curves indicate biological processes of interest.
+        \item Metagenes with signiatures that result in the separation of \href{https://www.mygreatlearning.com/blog/kaplan-meier-curve-explained}{Kaplan-Meier} survival curves indicate biological processes of interest.
         \pause
         \item Separating tumors by stage results in different metagenes of interest, seeming to indicate that different biological processes become more prominent as the disease progresses.
     \end{itemize}
@@ -498,7 +526,7 @@
 \begin{frame}
     \frametitle{Future Investigations}
     \begin{itemize}
-        \item Using signiatures to determine a patient's risk and aggresiveness of treatment (\href{https://github.com/tristanh314/lust-cancer-2019/blob/master/papers/melanoma_signature_2.pdf}{Nation, 2019}).
+        \item Using signiatures to determine a patient's risk and aggresiveness of treatment (\href{https://github.com/tristanh314/lust-cancer-2019/blob/master/papers/melanoma_signature_2.pdf}{Nation, 2019}). Training is promising, further open source testing is needed.
         \pause
         \item Include methyliation and microRNA expression in the analysis.
         \pause
@@ -561,15 +589,13 @@
 		\begin{column}{0.45\textwidth}
 			\textbf{Moral Support and Inspiration}
 			\begin{itemize}
-                \item Sig-Linda Jacobson
-                \item John Eric Holmes (RIP)
 				\item Friends and Family
 				\item Agnes Meyer Driscoll
                 \item Charles Lutwidge Dodgson
 			\end{itemize}
             \textbf{Special Assistant}
             \begin{itemize}
-                \item Doctor Frankenstein Jacobson
+                \item Doctor Frankenstein
             \end{itemize}
 		\end{column}
 	\end{columns}
