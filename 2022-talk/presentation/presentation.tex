@@ -185,21 +185,18 @@
 
 %------------------------------------------------
 \begin{frame}
-	\frametitle{Overview of Procedure}
+	\frametitle{LUST at a Glance}
 	
 	\begin{itemize}
-        \item The LUST algorithm is a discrete mathematical method for analyzing continuous data, e.g., mRNA expression.
+        \item Input consists of \textbf{continuous} mRNA expression data for a set of patients whose tumors were biopsied, along with survival times from diagnosis.
         \pause
-        \item For a given array of expression data, the algorithm is applied twice.
+        \item The expression data is binned into ``overexpression,'' ``underexpression,'' and ``medium expression.'' A new array of \textbf{discrete} data is made with enries of $-1,\ 1$ and $0$, respectively.
         \pause
-        \item 
-        \begin{enumerate}
-            \item The first unsupervised run is on the entire expression matrix. This pass identifies and ranks a small set of \emph{metagenes} associated with the given cancer.
-            \pause
-            \item The second run is supervised on the expression matrices for each metagene. This pass identifies small predictive \emph{signiatures} for each metagene.
-        \end{enumerate}
+        \item The \textbf{discrete} data is used to group genes that tend to overexpress and/or underexpress together. These groups are called \emph{metagenes}. 
         \pause
-        \item Certain signiatures, particularly those related to processes involved with immune system response, would seem approprite to use as guides for treatment.
+        \item The \textbf{discrete} expression data is analyzed again to find smaller sets of genes that regulate metagene expression, these smaller sets are called \emph{signatures}.
+        \pause
+        \item A model $\theta$ is produced that takes \textbf{continuous} expression data for signatures as input and outputs a real number. Values of $\theta$ can be used to place patients in high and low risk categories. 
     \end{itemize}
 \end{frame}
 

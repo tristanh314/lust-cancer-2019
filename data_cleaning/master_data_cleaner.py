@@ -151,10 +151,10 @@ cleaner('../2022_raw_data/clinical/GBMLGG.clin.merged.txt',
         'patient.follow_ups.follow_up-3.days_to_last_followup'],
        '../2022_processed_data/GBMLGG_clin_clean.csv', '../2022_processed_data/GBMLGG_gene_clean.csv')
 
-# Join processed data on patient ID for collaborations.
+# Join and invert processed data on patient ID for collaborations.
 import numpy as np
 import pandas as pd
 join_data_genetic = pd.read_csv("2022_processed_data/GBMLGG_gene_clean.csv",header=None, index_col=0)
 join_data_clinical = pd.read_csv("2022_processed_data/GBMLGG_clin_clean.csv",header=None,index_col=0)
-complete_data = pd.concat([join_data_clinical, join_data_genetic])
-complete_data.to_csv('../2022_processed_data/GBMLGG_complete_clean.csv')
+complete_data = pd.concat([join_data_clinical, join_data_genetic]).transpose()
+complete_data.to_csv('2022_processed_data/GBMLGG_complete_clean.csv')
