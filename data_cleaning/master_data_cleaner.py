@@ -118,8 +118,8 @@ def cleaner(clin_data, gene_data, stage_column, death_columns, follow_up_columns
             clin_clean = clin_clean.drop(labels=index, axis=0)
     # Compare the patient barcodes present in the gene expression data and the
     # clinical data to ensure every sample matches
-    hybrid_ref_pre = np.array(list(map(lambda x: x.lower(), hybrid_ref_pre)))
-    print(hybrid_ref_pre == clin_clean['patient.bcr_patient_barcode'].to_numpy())
+    # hybrid_ref_pre = np.array(list(map(lambda x: x.lower(), hybrid_ref_pre)))
+    # print(hybrid_ref_pre == clin_clean['patient.bcr_patient_barcode'].to_numpy())
     # Create new columns in the dataframe containing the stage of the tumor
     # as an integer whether the patient was alive or dead at
     # last contact, the days to last contact, and the patient's age at last
@@ -154,7 +154,12 @@ cleaner('../2022_raw_data/clinical/GBMLGG.clin.merged.txt',
 # Join and invert processed data on patient ID for collaborations.
 import numpy as np
 import pandas as pd
-join_data_genetic = pd.read_csv("2022_processed_data/GBMLGG_gene_clean.csv",header=None, index_col=0)
-join_data_clinical = pd.read_csv("2022_processed_data/GBMLGG_clin_clean.csv",header=None,index_col=0)
-complete_data = pd.concat([join_data_clinical, join_data_genetic]).transpose()
-complete_data.to_csv('2022_processed_data/GBMLGG_complete_clean.csv')
+shared_data_genetic = pd.read_csv("2022_processed_data/GBMLGG_gene_clean.csv",header=None, index_col=0).transpose()
+shared_data_clinical = pd.read_csv("2022_processed_data/GBMLGG_clin_clean.csv",header=None,index_col=0).transpose()
+shared_data_complete = shared_data_genetic
+shared_data_complete['Alive or Dead'] = shared_data_clinical['Alive or Dead']
+shared_data_complete['Last Contact'] = shared_data_clinical['Last Contact']
+shared_data_complete['Age at Last Contact'] = shared_data_clinical['Age at Last Contact']
+print(shared_data_complete.head())
+# complete_data = pd.concat([join_data_clinical, join_data_genetic]).transpose()
+# complete_data.to_csv('2022_processed_data/GBMLGG_complete_clean.csv')
