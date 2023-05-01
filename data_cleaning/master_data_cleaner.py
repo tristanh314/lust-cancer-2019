@@ -162,3 +162,5 @@ shared_data_complete['Last Contact'] = shared_data_clinical['Last Contact']
 shared_data_complete['Age at Last Contact'] = shared_data_clinical['Age at Last Contact']
 # print(shared_data_complete.head())
 shared_data_complete.to_csv('2022_processed_data/GBMLGG_complete_clean.csv')
+
+# Random data generation for talks

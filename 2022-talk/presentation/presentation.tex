@@ -196,7 +196,7 @@
         \pause
         \item The \textbf{discrete} expression data is analyzed again to find smaller sets of genes that regulate metagene expression, these smaller sets are called \emph{signatures}.
         \pause
-        \item A model $\theta$ is produced that takes \textbf{continuous} expression data for signatures as input and outputs a real number. Values of $\theta$ can be used to place patients in high and low risk categories. 
+        \item A regression $\theta$ is produced that takes \textbf{continuous} expression data for signatures as input and outputs a real number. Values of $\theta$ can be used to place patients in high and low risk categories. 
     \end{itemize}
 \end{frame}
 
@@ -258,7 +258,7 @@
     \begin{block}{Output}
         \begin{itemize}
             \item Metagenes (Part I) or signiatures (Part II) ranked by an objective function.
-            \item For Part II only, \href{https://www.mygreatlearning.com/blog/kaplan-meier-curve-explained}{Kaplan-Meyer} survival curves and a model scoring each metagene based on survival.
+            \item For Part II only, \href{https://www.mygreatlearning.com/blog/kaplan-meier-curve-explained}{Kaplan-Meyer} survival curves and a regression model scoring each metagene based on survival.
         \end{itemize}
     \end{block}
 \end{frame}
@@ -382,7 +382,7 @@
             F(G_X) = -\ln(p_1)-ln(p_2)
         \end{equation*}
         \pause
-        For metagenes with high Fisher scores, the eigen-survival score is a model that may be useful for classifying risk, see \cite{p3}
+        For metagenes with high Fisher scores, the eigen-survival score is a regression model that may be useful for classifying risk, see \cite{p3}
     \end{block}
 \end{frame}
 
