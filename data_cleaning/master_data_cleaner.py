@@ -164,3 +164,5 @@ shared_data_complete['Age at Last Contact'] = shared_data_clinical['Age at Last 
 shared_data_complete.to_csv('2022_processed_data/GBMLGG_complete_clean.csv')
 
 # Random data generation for talks
+randos = np.random.normal(size=(5,5,1))
+print(randos)
