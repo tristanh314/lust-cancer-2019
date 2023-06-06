@@ -225,13 +225,14 @@
 \begin{frame}
 	\frametitle{An Example: Raw Data}
 	\begin{table}
-        \begin{tabular}{|l|l|l|l|l|}
+        \begin{tabular}{|l||l|l|l|l|l|}
         \hline
-        0.7282 & -0.6965 & -0.1177 & -0.4713 & -0.4377 \\ \hline
-        0.3909 & -0.5468 & 0.1620 & -1.1057 & 0.6977 \\ \hline
-        2.2909 & -0.7040 & 0.2556 & 0.6545 & 1.1792 \\ \hline
-        -1.0335 & 1.4561 & 0.0271 & -0.4533 & -1.2070 \\ \hline
-        -0.7702 & 1.7896 & -0.3260 & -1.1195 & -0.1820 \\ \hline
+         & P1 & P2 & P3 & P4 & P5 \\ \hline \hline
+        G1 & 0.7282 & -0.6965 & -0.1177 & -0.4713 & -0.4377 \\ \hline
+        G2 & 0.3909 & -0.5468 & 0.1620 & -1.1057 & 0.6977 \\ \hline
+        G3 & 2.2909 & -0.7040 & 0.2556 & 0.6545 & 1.1792 \\ \hline
+        G4 & -1.0335 & 1.4561 & 0.0271 & -0.4533 & -1.2070 \\ \hline
+        G5 & -0.7702 & 1.7896 & -0.3260 & -1.1195 & -0.1820 \\ \hline
     \end{tabular}
     \end{table}
 
@@ -256,6 +257,34 @@
         \pause
         \item For this study $D = 0.5$ for all cancers. In any particular study, one may seek to vary $D$ to optimize the results.
     \end{itemize}
+\end{frame}
+
+%------------------------------------------------
+\begin{frame}
+	\frametitle{An Example: Data Discretization}
+	\begin{table}
+        \begin{tabular}{|l||l|l|l|l|l|}
+        \hline
+         & P1 & P2 & P3 & P4 & P5 \\ \hline \hline
+        G1 & 0.7282 & -0.6965 & -0.1177 & -0.4713 & -0.4377 \\ \hline
+        G2 & 0.3909 & -0.5468 & 0.1620 & -1.1057 & 0.6977 \\ \hline
+        G3 & 2.2909 & -0.7040 & 0.2556 & 0.6545 & 1.1792 \\ \hline
+        G4 & -1.0335 & 1.4561 & 0.0271 & -0.4533 & -1.2070 \\ \hline
+        G5 & -0.7702 & 1.7896 & -0.3260 & -1.1195 & -0.1820 \\ \hline
+    \end{tabular}
+    \end{table}
+    \pause
+	\begin{table}
+        \begin{tabular}{|l||l|l|l|l|l|}
+        \hline
+         & P1 & P2 & P3 & P4 & P5 \\ \hline \hline
+        G1 & 1 & 0 & 0 & 0 & 0 \\ \hline
+        G2 & 0 & 0 & 0 & -1 & 0 \\ \hline
+        G3 & 1 & -1 & 0 & 1 & 1 \\ \hline
+        G4 & -1 & 1 & 0 & 0 & -1 \\ \hline
+        G5 & -1 & 1 & 0 & -1 & 0 \\ \hline
+    \end{tabular}
+    \end{table}
 \end{frame}
 
 %----------------------------------------------------------------------------------------
